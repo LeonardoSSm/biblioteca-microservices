@@ -1,0 +1,11 @@
+server:
+  port: 8083
+
+spring:
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+
+app:
+  amqp:
+    queue: reservas.disponibilizadas

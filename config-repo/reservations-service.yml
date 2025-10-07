@@ -1,0 +1,29 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:postgresql://reservations-db:5432/reservations
+    username: reservations
+    password: reservations
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+spring:
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+
+app:
+  amqp:
+    exchange: reservas.exchange
+    routingKey: reserva.disponibilizada
+    queue: reservas.disponibilizadas
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

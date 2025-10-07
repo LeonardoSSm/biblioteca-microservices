@@ -1,0 +1,107 @@
+services:
+  config-server:
+    build: ./config-server
+    ports: ["8888:8888"]
+    volumes:
+      - ./config-repo:/config-repo
+
+  discovery-server:
+    build: ./discovery-server
+    ports: ["8761:8761"]
+    depends_on: [config-server]
+
+  catalog-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: catalog
+      POSTGRES_USER: catalog
+      POSTGRES_PASSWORD: catalog
+    ports: ["5433:5432"]
+
+  reservations-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: reservations
+      POSTGRES_USER: reservations
+      POSTGRES_PASSWORD: reservations
+    ports: ["5434:5432"]
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports: ["5672:5672", "15672:15672"]
+
+  catalog-service:
+    build: ./catalog-service
+    ports: ["8081:8081"]
+    depends_on:
+      config-server:
+        condition: service_started
+      discovery-server:
+        condition: service_started
+      catalog-db:
+        condition: service_started
+    environment:
+      SPRING_APPLICATION_NAME: catalog-service
+      SPRING_CONFIG_IMPORT: "optional:configserver:"
+      SPRING_CLOUD_CONFIG_URI: "http://config-server:8888"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://discovery-server:8761/eureka"
+      # Datasource (fallback local)
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://catalog-db:5432/catalog"
+      SPRING_DATASOURCE_USERNAME: "catalog"
+      SPRING_DATASOURCE_PASSWORD: "catalog"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+
+  reservations-service:
+    build: ./reservations-service
+    ports: ["8082:8082"]
+    depends_on:
+      config-server:
+        condition: service_started
+      discovery-server:
+        condition: service_started
+      reservations-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    environment:
+      SPRING_APPLICATION_NAME: reservations-service
+      SPRING_CONFIG_IMPORT: "optional:configserver:"
+      SPRING_CLOUD_CONFIG_URI: "http://config-server:8888"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://discovery-server:8761/eureka"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://reservations-db:5432/reservations"
+      SPRING_DATASOURCE_USERNAME: "reservations"
+      SPRING_DATASOURCE_PASSWORD: "reservations"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+
+  api-gateway:
+    build: ./api-gateway
+    ports: ["8080:8080"]
+    depends_on: [config-server, discovery-server, catalog-service, reservations-service]
+    environment:
+      SPRING_APPLICATION_NAME: api-gateway
+      SPRING_CONFIG_IMPORT: "optional:configserver:"
+      SPRING_CLOUD_CONFIG_URI: "http://config-server:8888"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://discovery-server:8761/eureka"
+
+  notifier-service:
+    build: ./notifier-service
+    ports: ["8083:8083"]
+    depends_on: [config-server, rabbitmq]
+    environment:
+      SPRING_APPLICATION_NAME: notifier-service
+      SPRING_CONFIG_IMPORT: "optional:configserver:"
+      SPRING_CLOUD_CONFIG_URI: "http://config-server:8888"
+
+  prometheus:
+    build: ./prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    ports: ["3000:3000"]
+
+  zipkin:
+    image: openzipkin/zipkin
+    ports: ["9411:9411"]
