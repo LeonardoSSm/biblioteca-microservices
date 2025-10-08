@@ -53,25 +53,49 @@ services:
 
   reservations-service:
     build: ./reservations-service
-    ports: ["8082:8082"]
+    ports: [ "8082:8082" ]
     depends_on:
       config-server:
-        condition: service_started
+        condition: service_started   # pode trocar p/ service_healthy se tiver healthcheck
       discovery-server:
-        condition: service_started
+          condition: service_started
       reservations-db:
-        condition: service_started
+          condition: service_started
       rabbitmq:
-        condition: service_started
+          condition: service_started
     environment:
       SPRING_APPLICATION_NAME: reservations-service
       SPRING_CONFIG_IMPORT: "optional:configserver:"
       SPRING_CLOUD_CONFIG_URI: "http://config-server:8888"
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://discovery-server:8761/eureka"
+
+      # Datasource (já estava ok pelos logs, mas deixo explícito)
       SPRING_DATASOURCE_URL: "jdbc:postgresql://reservations-db:5432/reservations"
       SPRING_DATASOURCE_USERNAME: "reservations"
       SPRING_DATASOURCE_PASSWORD: "reservations"
       SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+
+      # RabbitMQ (necessário p/ AMQP)
+      SPRING_RABBITMQ_HOST: "rabbitmq"
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: "guest"
+      SPRING_RABBITMQ_PASSWORD: "guest"
+
+      # >>> PLACEHOLDERS usados no ReservaService <<<
+      APP_AMQP_EXCHANGE: "library.exchange"
+      APP_AMQP_QUEUE: "notifications-queue"
+      APP_AMQP_ROUTING_KEY: "notifications.route"
+
+      SPRING_APPLICATION_JSON: |
+        {
+          "app": {
+            "amqp": {
+              "exchange": "library.exchange",
+              "queue": "notifications-queue",
+              "routingKey": "notifications.route"
+            }
+          }
+        }
 
   api-gateway:
     build: ./api-gateway
@@ -85,12 +109,36 @@ services:
 
   notifier-service:
     build: ./notifier-service
-    ports: ["8083:8083"]
-    depends_on: [config-server, rabbitmq]
+    ports: [ "8083:8083" ]
+    depends_on:
+      config-server:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
     environment:
       SPRING_APPLICATION_NAME: notifier-service
       SPRING_CONFIG_IMPORT: "optional:configserver:"
       SPRING_CLOUD_CONFIG_URI: "http://config-server:8888"
+
+      SPRING_RABBITMQ_HOST: "rabbitmq"
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: "guest"
+      SPRING_RABBITMQ_PASSWORD: "guest"
+
+      APP_AMQP_EXCHANGE: "library.exchange"
+      APP_AMQP_QUEUE: "notifications-queue"
+      APP_AMQP_ROUTING_KEY: "notifications.route"
+
+      SPRING_APPLICATION_JSON: |
+        {
+          "app": {
+            "amqp": {
+              "exchange": "library.exchange",
+              "queue": "notifications-queue",
+              "routingKey": "notifications.route"
+            }
+          }
+        }
 
   prometheus:
     build: ./prometheus

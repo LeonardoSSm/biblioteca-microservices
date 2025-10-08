@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Biblioteca Universitária</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-book"></i> Sistema Biblioteca Universitária</h1>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active" data-tab="autores">Autores</a></li>
+                    <li><a href="#" data-tab="livros">Livros</a></li>
+                    <li><a href="#" data-tab="alunos">Alunos</a></li>
+                    <li><a href="#" data-tab="emprestimos">Empréstimos</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Seção de Autores -->
+        <section id="autores" class="tab-content active">
+            <h2><i class="fas fa-users"></i> Gerenciamento de Autores</h2>
+            <div class="card">
+                <div class="card-header">
+                    <button id="btn-novo-autor" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Novo Autor
+                    </button>
+                    <div class="search-box">
+                        <input type="text" id="busca-autor" placeholder="Buscar autor...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="lista-autores" class="data-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Livros -->
+        <section id="livros" class="tab-content">
+            <h2><i class="fas fa-book"></i> Gerenciamento de Livros</h2>
+            <div class="card">
+                <div class="card-header">
+                    <button id="btn-novo-livro" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Novo Livro
+                    </button>
+                    <div class="search-box">
+                        <input type="text" id="busca-livro" placeholder="Buscar livro...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="lista-livros" class="data-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Alunos -->
+        <section id="alunos" class="tab-content">
+            <h2><i class="fas fa-user-graduate"></i> Gerenciamento de Alunos</h2>
+            <div class="card">
+                <div class="card-header">
+                    <button id="btn-novo-aluno" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Novo Aluno
+                    </button>
+                    <div class="search-box">
+                        <input type="text" id="busca-aluno" placeholder="Buscar aluno...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="lista-alunos" class="data-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Empréstimos -->
+        <section id="emprestimos" class="tab-content">
+            <h2><i class="fas fa-exchange-alt"></i> Gerenciamento de Empréstimos</h2>
+            <div class="card">
+                <div class="card-header">
+                    <button id="btn-novo-emprestimo" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Novo Empréstimo
+                    </button>
+                    <div class="filter-box">
+                        <select id="filtro-status">
+                            <option value="todos">Todos</option>
+                            <option value="ativos">Ativos</option>
+                            <option value="finalizados">Finalizados</option>
+                            <option value="atrasados">Atrasados</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="lista-emprestimos" class="data-list"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Genérico -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-titulo">Modal Title</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="modal-form"></form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btn-cancelar">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn-salvar">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
